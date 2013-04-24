@@ -171,5 +171,10 @@ public class LinkedBag<E> implements Collection<E> {
             }
             throw new NoSuchElementException("Iteration has no more elements");
         }
+
+        @Override
+        public void remove() {
+            throw new UnsupportedOperationException("Remove operation is not supported by this Iterator");
+        }
     }
 }
