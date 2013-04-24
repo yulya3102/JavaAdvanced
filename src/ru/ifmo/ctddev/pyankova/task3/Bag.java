@@ -11,7 +11,7 @@ import java.util.*;
  */
 
 public class Bag<E> implements Collection<E> {
-    private Map<E, List<E>> map;
+    private Map<E, LinkedList<E>> map;
     private int size = 0;
 
     @Override
@@ -46,13 +46,27 @@ public class Bag<E> implements Collection<E> {
 
     @Override
     public boolean add(E e) {
-        List<E> list = map.get(e);
+        LinkedList<E> list = map.get(e);
         if (list == null) {
             list = new LinkedList<>();
             map.put(e, list);
         }
         list.add(e);
         size++;
+        return true;
+    }
+
+    @Override
+    public boolean remove(Object o) {
+        LinkedList<E> list = map.get(o);
+        if (list == null) {
+            return false;
+        }
+        list.remove();
+        size--;
+        if (list.isEmpty()) {
+            map.remove(o);
+        }
         return true;
     }
 
@@ -67,6 +81,17 @@ public class Bag<E> implements Collection<E> {
             add(e);
         }
         return true;
+    }
+
+    @Override
+    public boolean removeAll(Collection<?> objects) {
+        boolean result = false;
+        for (Object o : objects) {
+            if (remove(o)) {
+                result = true;
+            }
+        }
+        return result;
     }
 
     @Override
