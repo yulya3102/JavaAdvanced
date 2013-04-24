@@ -23,6 +23,11 @@ public class LinkedBag<E> implements Collection<E> {
     private Map<E, Integer> map = null;
     private int size = 0;
 
+    public LinkedBag() {
+        set = new LinkedHashSet<>();
+        map = new HashMap<>();
+    }
+
     @Override
     public int size() {
         return size;
@@ -31,6 +36,11 @@ public class LinkedBag<E> implements Collection<E> {
     @Override
     public boolean isEmpty() {
         return size == 0;
+    }
+
+    @Override
+    public boolean contains(Object o) {
+        return map.containsKey(o);
     }
 
     @Override
@@ -81,5 +91,26 @@ public class LinkedBag<E> implements Collection<E> {
         set.clear();
         map.clear();
         size = 0;
+    }
+
+    private class LinkedBagIterator implements Iterator<E> {
+        private Iterator<Node> nodeIterator;
+
+        public LinkedBagIterator() {
+            nodeIterator = set.iterator();
+        }
+
+        @Override
+        public boolean hasNext() {
+            return nodeIterator.hasNext();
+        }
+
+        @Override
+        public E next() {
+            if (nodeIterator.hasNext()) {
+                return nodeIterator.next().value;
+            }
+            throw new NoSuchElementException("Iteration has no more elements");
+        }
     }
 }
