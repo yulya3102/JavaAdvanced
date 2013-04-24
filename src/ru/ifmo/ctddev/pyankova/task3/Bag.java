@@ -133,5 +133,12 @@ public class Bag<E> implements Collection<E> {
             }
             throw new NoSuchElementException("Iteration has no more elements");
         }
+
+        @Override
+        public void remove() {
+            // throws necessary exceptions
+            listIterator.remove();
+            size--;
+        }
     }
 }
