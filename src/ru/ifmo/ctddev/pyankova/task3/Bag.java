@@ -77,10 +77,13 @@ public class Bag<E> implements Collection<E> {
 
     @Override
     public boolean addAll(Collection<? extends E> es) {
+        boolean result = false;
         for (E e : es) {
-            add(e);
+            if (add(e)) {
+                result = true;
+            }
         }
-        return true;
+        return result;
     }
 
     @Override
