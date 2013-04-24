@@ -9,12 +9,12 @@ import java.util.*;
  * Time: 22:15
  * To change this template use File | Settings | File Templates.
  */
-public class LinkedBag<E> implements Collection<E> {
+public class LinkedBag implements Collection {
     private class Node {
         public int index;
-        public E value;
+        public Object value;
 
-        public Node(int index, E value) {
+        public Node(int index, Object value) {
             this.index = index;
             this.value = value;
         }
@@ -30,7 +30,7 @@ public class LinkedBag<E> implements Collection<E> {
     }
 
     private Set<Node> set = null;
-    private Map<E, Integer> map = null;
+    private Map<Object, Integer> map = null;
     private int size = 0;
 
     public LinkedBag() {
@@ -54,7 +54,7 @@ public class LinkedBag<E> implements Collection<E> {
     }
 
     @Override
-    public Iterator<E> iterator() {
+    public Iterator<Object> iterator() {
         return new LinkedBagIterator();
     }
 
@@ -62,29 +62,29 @@ public class LinkedBag<E> implements Collection<E> {
     public Object[] toArray() {
         Object[] array = new Object[size];
         int size = 0;
-        for (E e : this) {
+        for (Object e : this) {
             array[size++] = e;
         }
         return array;
     }
 
     @Override
-    public <T> T[] toArray(T[] ts) {
-        if (ts.length < size) {
-            return (T[]) toArray();
+    public Object[] toArray(Object[] objects) {
+        if (objects.length < size) {
+            return toArray();
         }
         int size = 0;
-        for (E e : this) {
-            ts[size++] = (T) e;
+        for (Object o : this) {
+            objects[size++] = o;
         }
-        for (; size < ts.length; size++) {
-            ts[size] = null;
+        for (; size < objects.length; size++) {
+            objects[size] = null;
         }
-        return ts;
+        return objects;
     }
 
     @Override
-    public boolean add(E e) {
+    public boolean add(Object e) {
         Integer index = map.get(e);
         if (index == null) {
             index = 0;
@@ -101,7 +101,7 @@ public class LinkedBag<E> implements Collection<E> {
         if (index == null) {
             return false;
         }
-        E e = (E) o;
+        Object e = o;
         Node node = new Node(--index, e);
         if (set.remove(node)) {
             size--;
@@ -117,14 +117,14 @@ public class LinkedBag<E> implements Collection<E> {
     }
 
     @Override
-    public boolean containsAll(Collection<?> objects) {
+    public boolean containsAll(Collection objects) {
         return map.keySet().containsAll(objects);
     }
 
     @Override
-    public boolean addAll(Collection<? extends E> es) {
+    public boolean addAll(Collection es) {
         boolean result = false;
-        for (E e : es) {
+        for (Object e : es) {
             if (add(e)) {
                 result = true;
             }
@@ -133,7 +133,7 @@ public class LinkedBag<E> implements Collection<E> {
     }
 
     @Override
-    public boolean removeAll(Collection<?> objects) {
+    public boolean removeAll(Collection objects) {
         boolean result = false;
         for (Object o : objects) {
             if (remove(o)) {
@@ -144,10 +144,10 @@ public class LinkedBag<E> implements Collection<E> {
     }
 
     @Override
-    public boolean retainAll(Collection<?> objects) {
+    public boolean retainAll(Collection objects) {
         boolean result = false;
-        for (Map.Entry<E, Integer> entry : map.entrySet()) {
-            E e = entry.getKey();
+        for (Map.Entry<Object, Integer> entry : map.entrySet()) {
+            Object e = entry.getKey();
             if (!objects.contains(e)) {
                 Integer index = entry.getValue();
                 while (index > 0) {
@@ -167,7 +167,7 @@ public class LinkedBag<E> implements Collection<E> {
         size = 0;
     }
 
-    private class LinkedBagIterator implements Iterator<E> {
+    private class LinkedBagIterator implements Iterator<Object> {
         private Iterator<Node> nodeIterator;
 
         public LinkedBagIterator() {
@@ -180,7 +180,7 @@ public class LinkedBag<E> implements Collection<E> {
         }
 
         @Override
-        public E next() {
+        public Object next() {
             if (nodeIterator.hasNext()) {
                 return nodeIterator.next().value;
             }

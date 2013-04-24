@@ -10,8 +10,8 @@ import java.util.*;
  * To change this template use File | Settings | File Templates.
  */
 
-public class Bag<E> implements Collection<E> {
-    private Map<E, LinkedList<E>> map;
+public class Bag implements Collection {
+    private Map<Object, LinkedList<Object>> map;
     private int size = 0;
 
     public Bag() {
@@ -34,7 +34,7 @@ public class Bag<E> implements Collection<E> {
     }
 
     @Override
-    public Iterator<E> iterator() {
+    public Iterator<Object> iterator() {
         return new BagIterator();
     }
 
@@ -42,30 +42,30 @@ public class Bag<E> implements Collection<E> {
     public Object[] toArray() {
         Object[] array = new Object[size];
         int size = 0;
-        for (E e : this) {
+        for (Object e : this) {
             array[size++] = e;
         }
         return array;
     }
 
     @Override
-    public <T> T[] toArray(T[] ts) {
-        if (ts.length < size) {
-            return (T[]) toArray();
+    public Object[] toArray(Object[] objects) {
+        if (objects.length < size) {
+            return toArray();
         }
         int size = 0;
-        for (E e : this) {
-            ts[size++] = (T) e;
+        for (Object o : this) {
+            objects[size++] = o;
         }
-        for (; size < ts.length; size++) {
-            ts[size] = null;
+        for (; size < objects.length; size++) {
+            objects[size] = null;
         }
-        return ts;
+        return objects;
     }
 
     @Override
-    public boolean add(E e) {
-        LinkedList<E> list = map.get(e);
+    public boolean add(Object e) {
+        LinkedList<Object> list = map.get(e);
         if (list == null) {
             list = new LinkedList<>();
             map.put(e, list);
@@ -77,7 +77,7 @@ public class Bag<E> implements Collection<E> {
 
     @Override
     public boolean remove(Object o) {
-        LinkedList<E> list = map.get(o);
+        LinkedList<Object> list = map.get(o);
         if (list == null) {
             return false;
         }
@@ -90,15 +90,15 @@ public class Bag<E> implements Collection<E> {
     }
 
     @Override
-    public boolean containsAll(Collection<?> objects) {
+    public boolean containsAll(Collection objects) {
         return map.keySet().containsAll(objects);
     }
 
     @Override
-    public boolean addAll(Collection<? extends E> es) {
+    public boolean addAll(Collection collection) {
         boolean result = false;
-        for (E e : es) {
-            if (add(e)) {
+        for (Object o : collection) {
+            if (add(o)) {
                 result = true;
             }
         }
@@ -106,7 +106,7 @@ public class Bag<E> implements Collection<E> {
     }
 
     @Override
-    public boolean removeAll(Collection<?> objects) {
+    public boolean removeAll(Collection objects) {
         boolean result = false;
         for (Object o : objects) {
             if (remove(o)) {
@@ -117,11 +117,11 @@ public class Bag<E> implements Collection<E> {
     }
 
     @Override
-    public boolean retainAll(Collection<?> objects) {
-        Map<E, LinkedList<E>> newMap = new HashMap<>();
+    public boolean retainAll(Collection objects) {
+        Map<Object, LinkedList<Object>> newMap = new HashMap<>();
         int newSize = 0;
         for (Object o : objects) {
-            LinkedList<E> list = map.get(o);
+            LinkedList<Object> list = map.get(o);
             if (list != null) {
                 newMap.put(list.getFirst(), list);
                 newSize += list.size();
@@ -139,9 +139,9 @@ public class Bag<E> implements Collection<E> {
         size = 0;
     }
 
-    private class BagIterator implements Iterator<E> {
-        private Iterator<LinkedList<E>> mapIterator = null;
-        private Iterator<E> listIterator = null;
+    private class BagIterator implements Iterator<Object> {
+        private Iterator<LinkedList<Object>> mapIterator = null;
+        private Iterator<Object> listIterator = null;
 
         public BagIterator() {
             mapIterator = map.values().iterator();
@@ -149,7 +149,7 @@ public class Bag<E> implements Collection<E> {
                 listIterator = mapIterator.next().iterator();
             } else {
                 // empty list iterator
-                listIterator = new LinkedList<E>().iterator();
+                listIterator = new LinkedList().iterator();
             }
         }
 
@@ -159,7 +159,7 @@ public class Bag<E> implements Collection<E> {
         }
 
         @Override
-        public E next() {
+        public Object next() {
             if (listIterator.hasNext()) {
                 return listIterator.next();
             }

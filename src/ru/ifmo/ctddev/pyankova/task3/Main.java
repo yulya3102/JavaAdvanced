@@ -11,13 +11,13 @@ import java.util.Arrays;
  */
 public class Main {
     public static void main(String[] args) {
-        Bag<Integer> bag = new Bag<>();
+        Bag bag = new Bag();
         bag.addAll(Arrays.asList(1, 2, 3, 2, 3, 5, 1));
         System.out.println(Arrays.toString(bag.toArray()));
         bag.remove(3);
         System.out.println(Arrays.toString(bag.toArray()));
 
-        LinkedBag<Integer> linkedBag = new LinkedBag<>();
+        LinkedBag linkedBag = new LinkedBag();
         linkedBag.addAll(Arrays.asList(1, 2, 3, 2, 3, 5, 1));
         System.out.println(Arrays.toString(linkedBag.toArray()));
         linkedBag.remove(3);
