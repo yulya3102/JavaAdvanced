@@ -69,6 +69,21 @@ public class LinkedBag<E> implements Collection<E> {
     }
 
     @Override
+    public <T> T[] toArray(T[] ts) {
+        if (ts.length < size) {
+            return (T[]) toArray();
+        }
+        int size = 0;
+        for (E e : this) {
+            ts[size++] = (T) e;
+        }
+        for (; size < ts.length; size++) {
+            ts[size] = null;
+        }
+        return ts;
+    }
+
+    @Override
     public boolean add(E e) {
         Integer index = map.get(e);
         if (index == null) {
