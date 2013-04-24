@@ -13,9 +13,19 @@ public class LinkedBag<E> implements Collection<E> {
     private class Node {
         public int index;
         public E value;
+
         public Node(int index, E value) {
             this.index = index;
             this.value = value;
+        }
+
+        public int hashCode() {
+            return value.hashCode() + index;
+        }
+
+        public boolean equals(Object o) {
+            Node node = (Node) o;
+            return index == node.index && value == node.value;
         }
     }
 
@@ -71,6 +81,27 @@ public class LinkedBag<E> implements Collection<E> {
     }
 
     @Override
+    public boolean remove(Object o) {
+        Integer index = map.get(o);
+        if (index == null) {
+            return false;
+        }
+        E e = (E) o;
+        Node node = new Node(--index, e);
+        if (set.remove(node)) {
+            size--;
+            if (index == 0) {
+                map.remove(e);
+            } else {
+                map.put(e, index);
+            }
+            return true;
+        }
+        // this should never happen
+        return false;
+    }
+
+    @Override
     public boolean containsAll(Collection<?> objects) {
         return map.keySet().containsAll(objects);
     }
@@ -80,6 +111,34 @@ public class LinkedBag<E> implements Collection<E> {
         boolean result = false;
         for (E e : es) {
             if (add(e)) {
+                result = true;
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public boolean removeAll(Collection<?> objects) {
+        boolean result = false;
+        for (Object o : objects) {
+            if (remove(o)) {
+                result = true;
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public boolean retainAll(Collection<?> objects) {
+        boolean result = false;
+        for (Map.Entry<E, Integer> entry : map.entrySet()) {
+            E e = entry.getKey();
+            if (!objects.contains(e)) {
+                Integer index = entry.getValue();
+                while (index > 0) {
+                    remove(e);
+                    index--;
+                }
                 result = true;
             }
         }
