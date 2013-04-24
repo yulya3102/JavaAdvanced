@@ -52,6 +52,7 @@ public class Bag<E> implements Collection<E> {
             map.put(e, list);
         }
         list.add(e);
+        size++;
         return true;
     }
 
@@ -71,5 +72,6 @@ public class Bag<E> implements Collection<E> {
     @Override
     public void clear() {
         map.clear();
+        size = 0;
     }
 }
