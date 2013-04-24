@@ -102,4 +102,36 @@ public class Bag<E> implements Collection<E> {
         map.clear();
         size = 0;
     }
+
+    private class BagIterator implements Iterator<E> {
+        private Iterator<LinkedList<E>> mapIterator = null;
+        private Iterator<E> listIterator = null;
+
+        public BagIterator() {
+            mapIterator = map.values().iterator();
+            if (mapIterator.hasNext()) {
+                listIterator = mapIterator.next().iterator();
+            } else {
+                // empty list iterator
+                listIterator = new LinkedList<E>().iterator();
+            }
+        }
+
+        @Override
+        public boolean hasNext() {
+            return listIterator.hasNext() || mapIterator.hasNext();
+        }
+
+        @Override
+        public E next() {
+            if (listIterator.hasNext()) {
+                return listIterator.next();
+            }
+            if (mapIterator.hasNext()) {
+                listIterator = mapIterator.next().iterator();
+                return listIterator.next();
+            }
+            throw new NoSuchElementException("Iteration has no more elements");
+        }
+    }
 }
