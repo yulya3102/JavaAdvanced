@@ -14,6 +14,10 @@ public class Bag<E> implements Collection<E> {
     private Map<E, LinkedList<E>> map;
     private int size = 0;
 
+    public Bag() {
+        map = new HashMap<>();
+    }
+
     @Override
     public int size() {
         return size;
@@ -94,6 +98,23 @@ public class Bag<E> implements Collection<E> {
                 result = true;
             }
         }
+        return result;
+    }
+
+    @Override
+    public boolean retainAll(Collection<?> objects) {
+        Map<E, LinkedList<E>> newMap = new HashMap<>();
+        int newSize = 0;
+        for (Object o : objects) {
+            LinkedList<E> list = map.get(o);
+            if (list != null) {
+                newMap.put(list.getFirst(), list);
+                newSize += list.size();
+            }
+        }
+        boolean result = newSize == size;
+        map = newMap;
+        size = newSize;
         return result;
     }
 
