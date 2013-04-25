@@ -9,7 +9,7 @@ import java.util.*;
  * Time: 22:15
  * To change this template use File | Settings | File Templates.
  */
-public class LinkedBag implements Collection {
+public class LinkedBag extends AbstractSet {
     private class Node {
         public int index;
         public Object value;
@@ -44,43 +44,8 @@ public class LinkedBag implements Collection {
     }
 
     @Override
-    public boolean isEmpty() {
-        return size == 0;
-    }
-
-    @Override
-    public boolean contains(Object o) {
-        return map.containsKey(o);
-    }
-
-    @Override
-    public Iterator<Object> iterator() {
+    public Iterator iterator() {
         return new LinkedBagIterator();
-    }
-
-    @Override
-    public Object[] toArray() {
-        Object[] array = new Object[size];
-        int size = 0;
-        for (Object e : this) {
-            array[size++] = e;
-        }
-        return array;
-    }
-
-    @Override
-    public Object[] toArray(Object[] objects) {
-        if (objects.length < size) {
-            return toArray();
-        }
-        int size = 0;
-        for (Object o : this) {
-            objects[size++] = o;
-        }
-        for (; size < objects.length; size++) {
-            objects[size] = null;
-        }
-        return objects;
     }
 
     @Override
@@ -101,71 +66,21 @@ public class LinkedBag implements Collection {
         if (index == null) {
             return false;
         }
-        Object e = o;
-        Node node = new Node(--index, e);
+        Node node = new Node(--index, o);
         set.remove(node);
         size--;
         if (index == 0) {
-            map.remove(e);
+            map.remove(o);
         } else {
-            map.put(e, index);
+            map.put(o, index);
         }
         return true;
     }
 
-    @Override
-    public boolean containsAll(Collection objects) {
-        return map.keySet().containsAll(objects);
-    }
-
-    @Override
-    public boolean addAll(Collection es) {
-        boolean result = false;
-        for (Object e : es) {
-            if (add(e)) {
-                result = true;
-            }
-        }
-        return result;
-    }
-
-    @Override
-    public boolean removeAll(Collection objects) {
-        boolean result = false;
-        for (Object o : objects) {
-            if (remove(o)) {
-                result = true;
-            }
-        }
-        return result;
-    }
-
-    @Override
-    public boolean retainAll(Collection objects) {
-        boolean result = false;
-        for (Map.Entry<Object, Integer> entry : map.entrySet()) {
-            Object e = entry.getKey();
-            if (!objects.contains(e)) {
-                Integer index = entry.getValue();
-                while (index > 0) {
-                    remove(e);
-                    index--;
-                }
-                result = true;
-            }
-        }
-        return result;
-    }
-
-    @Override
-    public void clear() {
-        set.clear();
-        map.clear();
-        size = 0;
-    }
-
-    private class LinkedBagIterator implements Iterator<Object> {
-        private Iterator<Node> nodeIterator;
+    private class LinkedBagIterator implements Iterator {
+        private Iterator<Node> nodeIterator = null;
+        private boolean canRemove = false;
+        private Node currentNode = null;
 
         public LinkedBagIterator() {
             nodeIterator = set.iterator();
@@ -179,14 +94,23 @@ public class LinkedBag implements Collection {
         @Override
         public Object next() {
             if (nodeIterator.hasNext()) {
-                return nodeIterator.next().value;
+                canRemove = true;
+                currentNode = nodeIterator.next();
+                return currentNode.value;
             }
             throw new NoSuchElementException("Iteration has no more elements");
         }
 
         @Override
         public void remove() {
-            throw new UnsupportedOperationException("Remove operation is not supported by this Iterator");
+            if (canRemove) {
+                canRemove = false;
+                size--;
+                nodeIterator.remove();
+                // FIXME: map.get(currentNode.value) doesn't contain amount of objects equal to currentNode.value anymore
+            } else {
+                throw new IllegalStateException("next method has not yet been called, or the remove method has already been called after the last call to the next method");
+            }
         }
     }
 }

@@ -10,12 +10,17 @@ import java.util.*;
  * To change this template use File | Settings | File Templates.
  */
 
-public class Bag implements Collection {
-    private Map<Object, LinkedList<Object>> map;
+public class Bag extends AbstractSet {
+    private Map<Object, List> map;
     private int size = 0;
 
     public Bag() {
         map = new HashMap<>();
+    }
+
+    @Override
+    public Iterator iterator() {
+        return new BagIterator();
     }
 
     @Override
@@ -24,50 +29,10 @@ public class Bag implements Collection {
     }
 
     @Override
-    public boolean isEmpty() {
-        return (size == 0);
-    }
-
-    @Override
-    public boolean contains(Object o) {
-        return map.keySet().contains(o);
-    }
-
-    @Override
-    public Iterator<Object> iterator() {
-        return new BagIterator();
-    }
-
-    @Override
-    public Object[] toArray() {
-        Object[] array = new Object[size];
-        int size = 0;
-        for (Object e : this) {
-            array[size++] = e;
-        }
-        return array;
-    }
-
-    @Override
-    public Object[] toArray(Object[] objects) {
-        if (objects.length < size) {
-            return toArray();
-        }
-        int size = 0;
-        for (Object o : this) {
-            objects[size++] = o;
-        }
-        for (; size < objects.length; size++) {
-            objects[size] = null;
-        }
-        return objects;
-    }
-
-    @Override
     public boolean add(Object e) {
-        LinkedList<Object> list = map.get(e);
+        List list = map.get(e);
         if (list == null) {
-            list = new LinkedList<>();
+            list = new LinkedList();
             map.put(e, list);
         }
         list.add(e);
@@ -77,11 +42,11 @@ public class Bag implements Collection {
 
     @Override
     public boolean remove(Object o) {
-        LinkedList<Object> list = map.get(o);
+        List list = map.get(o);
         if (list == null) {
             return false;
         }
-        list.remove();
+        list.remove(o);
         size--;
         if (list.isEmpty()) {
             map.remove(o);
@@ -89,68 +54,21 @@ public class Bag implements Collection {
         return true;
     }
 
-    @Override
-    public boolean containsAll(Collection objects) {
-        return map.keySet().containsAll(objects);
-    }
-
-    @Override
-    public boolean addAll(Collection collection) {
-        boolean result = false;
-        for (Object o : collection) {
-            if (add(o)) {
-                result = true;
-            }
-        }
-        return result;
-    }
-
-    @Override
-    public boolean removeAll(Collection objects) {
-        boolean result = false;
-        for (Object o : objects) {
-            if (remove(o)) {
-                result = true;
-            }
-        }
-        return result;
-    }
-
-    @Override
-    public boolean retainAll(Collection objects) {
-        Map<Object, LinkedList<Object>> newMap = new HashMap<>();
-        int newSize = 0;
-        for (Object o : objects) {
-            LinkedList<Object> list = map.get(o);
-            if (list != null) {
-                newMap.put(list.getFirst(), list);
-                newSize += list.size();
-            }
-        }
-        boolean result = newSize == size;
-        map = newMap;
-        size = newSize;
-        return result;
-    }
-
-    @Override
-    public void clear() {
-        map.clear();
-        size = 0;
-    }
-
-    private class BagIterator implements Iterator<Object> {
-        private Iterator<LinkedList<Object>> mapIterator = null;
-        private Iterator<Object> listIterator = null;
+    private class BagIterator implements Iterator {
+        private Iterator<List> mapIterator = null;
+        private List currentList = null;
+        private Iterator listIterator = null;
+        private boolean canRemove = false;
 
         public BagIterator() {
             mapIterator = map.values().iterator();
             if (mapIterator.hasNext()) {
-                listIterator = mapIterator.next().iterator();
+                currentList = mapIterator.next();
             } else {
-                // empty list iterator
-                listIterator = new LinkedList().iterator();
+                // empty list
+                currentList = new LinkedList();
             }
+            listIterator = currentList.iterator();
         }
 
         @Override
@@ -161,10 +79,13 @@ public class Bag implements Collection {
         @Override
         public Object next() {
             if (listIterator.hasNext()) {
+                canRemove = true;
                 return listIterator.next();
             }
             if (mapIterator.hasNext()) {
-                listIterator = mapIterator.next().iterator();
+                canRemove = true;
+                currentList = mapIterator.next();
+                listIterator = currentList.iterator();
                 return listIterator.next();
             }
             throw new NoSuchElementException("Iteration has no more elements");
@@ -172,9 +93,16 @@ public class Bag implements Collection {
 
         @Override
         public void remove() {
-            // throws necessary exceptions
-            listIterator.remove();
-            size--;
+            if (canRemove) {
+                canRemove = false;
+                listIterator.remove();
+                size--;
+                if (currentList.isEmpty()) {
+                    mapIterator.remove();
+                }
+            } else {
+                throw new IllegalStateException("next method has not yet been called, or the remove method has already been called after the last call to the next method");
+            }
         }
     }
 }
