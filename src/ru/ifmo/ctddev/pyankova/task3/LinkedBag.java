@@ -103,17 +103,14 @@ public class LinkedBag implements Collection {
         }
         Object e = o;
         Node node = new Node(--index, e);
-        if (set.remove(node)) {
-            size--;
-            if (index == 0) {
-                map.remove(e);
-            } else {
-                map.put(e, index);
-            }
-            return true;
+        set.remove(node);
+        size--;
+        if (index == 0) {
+            map.remove(e);
+        } else {
+            map.put(e, index);
         }
-        // this should never happen
-        return false;
+        return true;
     }
 
     @Override
