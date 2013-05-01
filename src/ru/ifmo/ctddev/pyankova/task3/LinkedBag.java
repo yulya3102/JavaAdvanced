@@ -11,26 +11,28 @@ import java.util.*;
  */
 public class LinkedBag extends AbstractSet {
     private class Node {
-        public int index;
+        public Node prev;
+        public Node next;
         public Object value;
 
-        public Node(int index, Object value) {
-            this.index = index;
+        public Node(Object value, Node prev, Node next) {
             this.value = value;
+            this.prev = prev;
+            this.next = next;
         }
 
         public int hashCode() {
-            return value.hashCode() + index;
+            return value.hashCode() + (prev == null ? 0 : prev.value.hashCode()) + (next == null ? 0 : next.value.hashCode());
         }
 
         public boolean equals(Object o) {
             Node node = (Node) o;
-            return index == node.index && value == node.value;
+            return value == node.value && prev == node.prev && next == node.next;
         }
     }
 
     private Set<Node> set = null;
-    private Map<Object, Integer> map = null;
+    private Map<Object, Node> map = null;
     private int size = 0;
 
     public LinkedBag() {
@@ -50,52 +52,50 @@ public class LinkedBag extends AbstractSet {
 
     @Override
     public boolean add(Object e) {
-        Integer index = map.get(e);
-        if (index == null) {
-            index = 0;
-        }
-        set.add(new Node(index++, e));
-        map.put(e, index);
+        Node lastNode = map.get(e);
+        Node newNode = new Node(e, lastNode, null);
+        set.add(newNode);
+        map.put(e, newNode);
         size++;
         return true;
     }
 
     @Override
     public boolean remove(Object o) {
-        Integer index = map.get(o);
-        if (index == null) {
+        Node node = map.get(o);
+        if (node == null) {
             return false;
         }
-        Node node = new Node(--index, o);
+        // remove node from set
         set.remove(node);
         size--;
-        if (index == 0) {
-            map.remove(o);
-        } else {
-            map.put(o, index);
+        // remove node from map
+        map.put(o, node.prev);
+        if (node.prev != null) {
+            node.prev.next = null;
         }
         return true;
     }
 
     private class LinkedBagIterator implements Iterator {
-        private Iterator<Node> nodeIterator = null;
+        private Iterator<Node> setIterator = null;
         private boolean canRemove = false;
         private Node currentNode = null;
 
         public LinkedBagIterator() {
-            nodeIterator = set.iterator();
+            setIterator = set.iterator();
         }
 
         @Override
         public boolean hasNext() {
-            return nodeIterator.hasNext();
+            return setIterator.hasNext();
         }
 
         @Override
         public Object next() {
-            if (nodeIterator.hasNext()) {
+            if (setIterator.hasNext()) {
                 canRemove = true;
-                currentNode = nodeIterator.next();
+                currentNode = setIterator.next();
                 return currentNode.value;
             }
             throw new NoSuchElementException("Iteration has no more elements");
@@ -106,8 +106,18 @@ public class LinkedBag extends AbstractSet {
             if (canRemove) {
                 canRemove = false;
                 size--;
-                nodeIterator.remove();
-                // FIXME: map.get(currentNode.value) doesn't contain amount of objects equal to currentNode.value anymore
+                // remove from map
+                if (currentNode.prev != null) {
+                    currentNode.prev.next = currentNode.next;
+                }
+                if (currentNode.next != null) {
+                    currentNode.next.prev = currentNode.prev;
+                } else {
+                    // this is last element in map
+                    map.put(currentNode.value, currentNode.prev);
+                }
+                // remove from set
+                setIterator.remove();
             } else {
                 throw new IllegalStateException("next method has not yet been called, or the remove method has already been called after the last call to the next method");
             }
