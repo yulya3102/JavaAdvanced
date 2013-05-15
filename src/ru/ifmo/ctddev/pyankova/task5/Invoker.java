@@ -12,6 +12,28 @@ import java.util.Arrays;
  * Time: 23:21
  */
 public class Invoker {
+    private static void tryInvoke(Method method, Object object, String[] args) {
+        Class<?>[] parameters = method.getParameterTypes();
+        if (parameters.length != args.length) {
+            return;
+        }
+        for (Class<?> parameterClass : parameters) {
+            if (!parameterClass.isAssignableFrom(String.class)) {
+                return;
+            }
+        }
+        try {
+            method.invoke(object, args);
+            System.out.println(object);
+        } catch (IllegalAccessException e) {
+            System.out.println("Method " + method.getName() + " is inaccessible");
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            System.out.println("Method " + method.getName() + " threw an exception");
+            e.printStackTrace();
+        }
+    }
+
     public static void main(String[] args) {
         if (args.length < 2) {
             System.out.println("Usage: java Invoker <full-class-name> <method-name> <method-arg...>");
@@ -28,16 +50,11 @@ public class Invoker {
             try {
                 Constructor constructor = loadedClass.getConstructor();
                 Object object = constructor.newInstance();
-                try {
-                    Class[] argsTypes = new Class[methodArgs.length];
-                    Arrays.fill(argsTypes, Object.class);
-                    // TODO: invoke every method that can get these arguments
-                    Method loadedMethod = loadedClass.getMethod(methodName, argsTypes);
-                    loadedMethod.invoke(object, methodArgs);
-                    System.out.println(object);
-                } catch (NoSuchMethodException e) {
-                    System.out.println(fullClassName + " doesn't contain method " + methodName);
-                    e.printStackTrace();
+                Method[] classMethods = loadedClass.getMethods();
+                for (Method method : classMethods) {
+                    if (methodName.equals(method.getName())) {
+                        tryInvoke(method, object, methodArgs);
+                    }
                 }
             } catch (NoSuchMethodException e) {
                 System.out.println(fullClassName + " doesn't contain default constructor");
