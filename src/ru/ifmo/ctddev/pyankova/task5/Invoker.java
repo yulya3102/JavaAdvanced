@@ -31,7 +31,7 @@ public class Invoker {
                 try {
                     Class[] argsTypes = new Class[methodArgs.length];
                     Arrays.fill(argsTypes, Object.class);
-                    // TODO: invoke every method that can get this arguments
+                    // TODO: invoke every method that can get these arguments
                     Method loadedMethod = loadedClass.getMethod(methodName, argsTypes);
                     loadedMethod.invoke(object, methodArgs);
                     System.out.println(object);
