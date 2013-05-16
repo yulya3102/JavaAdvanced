@@ -64,17 +64,66 @@ public class MatrixMultiplicationCalculator {
      * @return product of two random matrices
      */
     public int[][] calculate(int threadsCount) {
-        // TODO: create m threads
-        for (int i = 0; i < size; i++) {
-            for (int j = 0; j < size; j++) {
-                int value = 0;
-                for (int k = 0; k < size; k++) {
-                    value += first[i][k] * second[k][j];
-                }
-                // TODO: join m threads
-                result[i][j] = value;
+        Thread[] threads = new Thread[threadsCount];
+        int workForThread = size * size / threadsCount;
+        for (int i = 0; i < threadsCount - 1; i++) {
+            threads[i] = new Thread(new MultiplicationRunnable(i * workForThread, i * workForThread + workForThread));
+            threads[i].start();
+        }
+        threads[threadsCount - 1] = new Thread(new MultiplicationRunnable((threadsCount - 1) * workForThread, size * size));
+        threads[threadsCount - 1].start();
+
+        for (Thread thread : threads) {
+            try {
+                thread.join();
+            } catch (InterruptedException e) {
+                System.out.println("Interrupted");
+                e.printStackTrace();
             }
         }
+
         return result;
+    }
+
+    /**
+     * Calculates part of matrices product
+     */
+    private class MultiplicationRunnable implements Runnable {
+        /**
+         * start index
+         */
+        private int start;
+
+        /**
+         * finish index
+         */
+        private int finish;
+
+        /**
+         * Constructs object that will calculate elements of result matrix from <code>start</code> to <code>finish</code>
+         *
+         * @param start start index
+         * @param finish finish index
+         */
+        public MultiplicationRunnable(int start, int finish) {
+            this.start = start;
+            this.finish = finish;
+        }
+
+        /**
+         * Calculates requested elements of result matrix
+         */
+        @Override
+        public void run() {
+            for (int index = start; index < finish; index++) {
+                int i = index / size;
+                int j = index - size * i;
+                int matrixElement = 0;
+                for (int k = 0; k < size; k++) {
+                    matrixElement += first[i][k] * second[k][j];
+                }
+                result[i][j] = matrixElement;
+            }
+        }
     }
 }
