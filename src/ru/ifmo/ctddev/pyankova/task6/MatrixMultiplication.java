@@ -19,10 +19,10 @@ public class MatrixMultiplication {
         int n = Integer.parseInt(args[0]);
         int m = Integer.parseInt(args[1]);
         MatrixMultiplicationCalculator calculator = new MatrixMultiplicationCalculator(n);
-        long startTime = System.nanoTime();
+        long startTime = System.currentTimeMillis();
         int[][] result = calculator.calculate(m);
-        long endTime = System.nanoTime();
-        System.out.println("Wall-clock time: " + (endTime - startTime) / 1000);
+        long endTime = System.currentTimeMillis();
+        System.out.println("Wall-clock time: " + (endTime - startTime) + " milliseconds");
         int sum = 0;
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < n; j++) {
