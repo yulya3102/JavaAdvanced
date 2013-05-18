@@ -19,16 +19,21 @@ public class MatrixMultiplication {
         int n = Integer.parseInt(args[0]);
         int m = Integer.parseInt(args[1]);
         MatrixMultiplicationCalculator calculator = new MatrixMultiplicationCalculator(n);
-        long startTime = System.currentTimeMillis();
-        int[][] result = calculator.calculate(m);
-        long endTime = System.currentTimeMillis();
-        System.out.println("Wall-clock time: " + (endTime - startTime) + " milliseconds");
-        int sum = 0;
-        for (int i = 0; i < n; i++) {
-            for (int j = 0; j < n; j++) {
-                sum += result[i][j];
+        try {
+            long startTime = System.currentTimeMillis();
+            int[][] result = calculator.calculate(m);
+            long endTime = System.currentTimeMillis();
+            System.out.println("Wall-clock time: " + (endTime - startTime) + " milliseconds");
+            int sum = 0;
+            for (int i = 0; i < n; i++) {
+                for (int j = 0; j < n; j++) {
+                    sum += result[i][j];
+                }
             }
+            System.out.println("Sum of result matrix elements: " + sum);
+        } catch (InterruptedException e) {
+            System.out.println("Interrupted");
+            e.printStackTrace();
         }
-        System.out.println("Sum of result matrix elements: " + sum);
     }
 }

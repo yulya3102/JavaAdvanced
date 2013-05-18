@@ -63,9 +63,9 @@ public class MatrixMultiplicationCalculator {
      * @param threadsCount number of threads that will be used to calculate product
      * @return product of two random matrices
      */
-    public int[][] calculate(int threadsCount) {
+    public int[][] calculate(int threadsCount) throws InterruptedException {
         Thread[] threads = new Thread[threadsCount];
-        int workForThread = size * size / threadsCount;
+        int workForThread = (size * size > threadsCount) ? size * size / threadsCount : 1;
         for (int i = 0; i < threadsCount - 1; i++) {
             threads[i] = new Thread(new MultiplicationRunnable(i * workForThread, i * workForThread + workForThread));
             threads[i].start();
@@ -74,14 +74,10 @@ public class MatrixMultiplicationCalculator {
         threads[threadsCount - 1].start();
 
         for (Thread thread : threads) {
-            try {
-                thread.join();
-            } catch (InterruptedException e) {
-                System.out.println("Interrupted");
-                e.printStackTrace();
-            }
+            thread.join();
         }
 
+        System.out.println("done");
         return result;
     }
 
@@ -116,6 +112,9 @@ public class MatrixMultiplicationCalculator {
         @Override
         public void run() {
             for (int index = start; index < finish; index++) {
+                if (index >= size * size) {
+                    return;
+                }
                 int i = index / size;
                 int j = index - size * i;
                 int matrixElement = 0;
